@@ -1,0 +1,4 @@
+paddlepaddle-gpu==1.8.4.post97
+opencv-python
+tqdm
+numpy
