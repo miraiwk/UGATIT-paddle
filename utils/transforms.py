@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
-import imaug 
 import random
+from . import imaug
 
 class Compose:
     def __init__(self, ops):

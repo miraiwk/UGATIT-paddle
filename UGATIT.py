@@ -411,7 +411,7 @@ class UGATIT(object):
             return
 
         self.genA2B.eval(), self.genB2A.eval()
-        for n, (real_A, _) in enumerate(self.testA_loader):
+        for n, (real_A, _) in tqdm(enumerate(self.testA_loader)):
 
             fake_A2B, _, fake_A2B_heatmap = self.genA2B(real_A)
 
@@ -429,7 +429,7 @@ class UGATIT(object):
 
             cv2.imwrite(os.path.join(self.result_dir, self.dataset, 'test', 'A2B_%d.png' % (n + 1)), A2B * 255.0)
 
-        for n, (real_B, _) in enumerate(self.testB_loader):
+        for n, (real_B, _) in tqdm(enumerate(self.testB_loader)):
 
             fake_B2A, _, fake_B2A_heatmap = self.genB2A(real_B)
 

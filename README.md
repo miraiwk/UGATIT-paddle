@@ -67,6 +67,8 @@ FLAGS_cudnn_exhaustive_search=True python main.py --light True --save_freq 500 -
 
 生成的结果会保存在目录`results/<数据集名称>/img`下.
 
+如果使用selfie2anime数据集, A2B表示从真人图像变换到动漫图像, B2A表示从动漫图像到真人图像.
+
 如果需要继续训练模型, 可以在参数后面加上`--resume True`的参数, 程序能够自动找到最近的保存点继续训练.
 
 单卡Tesla V100 16G, 在selfie2anime数据集上, 256x256分辨率, Batch Size 1, 训练Light模型100万次迭代, 需要约450小时(1.6s/it).
@@ -75,9 +77,11 @@ FLAGS_cudnn_exhaustive_search=True python main.py --light True --save_freq 500 -
 ```bash
 FLAGS_cudnn_exhaustive_search=True python main.py --light True --save_freq 500 --dataset data48778 --print_freq 200 --phase test
 ```
-程序会加载最近的保存点, 并进行测试.
+程序会加载最近的保存点, 并进行测试. 如果使用selfie2anime数据集, 通常30秒内能得到结果.
 
-生成的结果会保存在目录`results/<数据集名称>/img`下.
+生成的结果会保存在目录`results/<数据集名称>/test`下, 每个文件对应一张图片.
+
+如果使用selfie2anime数据集, A2B表示从真人图像变换到动漫图像, B2A表示从动漫图像到真人图像.
 
 ## 参数说明
 参数名称 | 说明

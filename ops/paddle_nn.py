@@ -6,8 +6,8 @@ from paddle.fluid.framework import _varbase_creator
 import paddle.fluid.layers as L
 import numpy as np
 import math
-from basic_nn import *
-from spectral_norm import MySpectralNorm, SpectralNormConv, SpectralNormLinear
+from .basic_nn import *
+from .spectral_norm import MySpectralNorm, SpectralNormConv, SpectralNormLinear
 
 def var(x, dim, unbiased=True, keepdim=False):
     # unbiased variance
@@ -20,7 +20,7 @@ def var(x, dim, unbiased=True, keepdim=False):
         e -= 1
     return L.reduce_sum(L.square(x - L.reduce_mean(x, dim=dim, keep_dim=True)), dim=dim, keep_dim=keepdim) / e
 
-from instance_norm import MyInstanceNorm2d as InstanceNorm2d
+from .instance_norm import MyInstanceNorm2d as InstanceNorm2d
 
 class ReflectionPad2d(fluid.dygraph.Layer):
     def __init__(self, padding):

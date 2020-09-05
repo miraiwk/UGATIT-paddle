@@ -1,6 +1,6 @@
 from paddle import fluid
 import paddle.fluid.layers as L
-from paddle_nn import var
+from .paddle_nn import var
 
 
 class MyInstanceNorm2d(fluid.dygraph.Layer):
