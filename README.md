@@ -198,3 +198,16 @@ A2B的结果图(从上到下共7张图片):
 - 到后期, `fake_A2B2A`变得越来越像B 
 - 50000时真人的脸没了, 是空的
 - 61200时, 动漫角色人脸开始出现真人的整张人脸了
+
+## 论文引用
+
+```
+@inproceedings{
+Kim2020U-GAT-IT:,
+title={U-GAT-IT: Unsupervised Generative Attentional Networks with Adaptive Layer-Instance Normalization for Image-to-Image Translation},
+author={Junho Kim and Minjae Kim and Hyeonwoo Kang and Kwang Hee Lee},
+booktitle={International Conference on Learning Representations},
+year={2020},
+url={https://openreview.net/forum?id=BJlZ5ySKPH}
+}
+```
