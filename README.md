@@ -11,7 +11,7 @@ This project is an unofficial Paddle implementation of U-GAT-IT: Unsupervised Ge
 - 重新实现了Instance Norm, 使用了CuDNN-Batch Norm, 计算更快, 数值更稳定
 - 对PaddlePaddle 1.8.4的优化器进行了hacker, 加入了`set_lr`函数
 - 重新封装的卷积, 全连接等算子, 使用Kaiming Uniform初始化卷积和全连接的权重
-- 代码结构与官方实现UGATIT-pytorch一致, 并且将额外的代码放到`ops/`和`utils/`两个目录中, 代码简洁, 方便阅读
+- 代码结构与官方实现UGATIT-pytorch一致, 并且将额外的代码放到`ops/`和`utils/`两个目录中, 对各个文件的作用进行了说明. 代码简洁, 方便阅读
 - 给出了日志与关于训练过程的详细记录, 见本文档末<关于GAN训练过程的记录>
 - 详细地说明了安装, 训练, 测试步骤
 
@@ -89,12 +89,12 @@ FLAGS_cudnn_exhaustive_search=True python main.py --light True --save_freq 500 -
 phase|可以取值为train或test, 分别表示训练和测试, 默认为train
 light|是否使用轻量模型, 默认为非轻量模型, 加上`--light True`参数后使用轻量模型
 dataset|数据集的名称, 数据集放在dataset文件夹下 
-iteration|迭代次数
-batch_size|一次迭代的样本数量
-print_freq|打印生成的图片的频率, 以一次迭代为单位
-save_freq|保存模型的频率, 以一次迭代为单位
+iteration|迭代次数, 默认为100万次
+batch_size|一次迭代的样本数量, 默认为1
+print_freq|打印生成的图片的频率, 以一次迭代为单位, 默认为1000
+save_freq|保存模型的频率, 以一次迭代为单位, 默认为10万. 但由于训练速度比较慢, 建议设为500或1000.
 decay_flag|是否对模型的学习率进行衰减, 默认为True
-lr|学习率
+lr|学习率, 默认为1e-4
 weight_decay|权重衰减系数, 默认为1e-4
 adv_weight|Adversarial loss的权重, 默认为1
 cycle_weight|Cycle loss的权重, 默认为10
@@ -104,9 +104,9 @@ n_res|Residual Block的个数, 默认为4
 n_dis|判别器的层数, 默认为6
 img_size|输入的图像分辨率, 默认为256
 img_ch|输入的图像的通道数, 默认为3
-result_dir|保存结果的目录
+result_dir|保存结果的目录, 默认为`results`目录
 device|使用的设备, 可选cpu和cuda, 默认为cuda
-resume|是否继续训练
+resume|是否继续训练, 默认从头开始训练. 若加上`--resume True`命令, 则找到最近的保存点继续训练.
 
 
 ## 复现的注意事项
@@ -202,6 +202,7 @@ B2A的结果图的源域和目标域和A2B的正好反过来.
 - 50000时真人的脸没了, 是空的
 - 61200时, 动漫角色人脸开始出现真人的整张人脸了
 - 生成的图片的颜色前期比较单调, 到后期变丰富
+- 会在某次迭代时模型变差, 比如84800
 
 ## 论文引用
 
