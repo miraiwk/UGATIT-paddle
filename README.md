@@ -112,22 +112,32 @@ resume|是否继续训练, 默认从头开始训练. 若加上`--resume True`命
 ## 代码结构
 
 - main.py
+
 入口代码, 负责声明各种命令参数
 
 - networks.py
+
 U-GAT-IT模型的搭建
 
 - UGATIT.py
+
 U-GAT-IT模型的训练与测试
 
 - dataset.py
+
 对数据集的读取
 
 - ops/
+
 算子的实现与封装, 文件夹内有具体说明
 
 - utils/
+
 图像读取, 增强等实现, 文件夹内有具体说明
+
+- logs/
+
+训练日志
 
 
 ## 复现的注意事项
