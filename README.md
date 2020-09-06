@@ -11,7 +11,7 @@ This project is an unofficial Paddle implementation of U-GAT-IT: Unsupervised Ge
 - 重新实现了Instance Norm, 使用了CuDNN-Batch Norm, 计算更快, 数值更稳定
 - 对PaddlePaddle 1.8.4的优化器进行了hacker, 加入了`set_lr`函数
 - 重新封装的卷积, 全连接等算子, 使用Kaiming Uniform初始化卷积和全连接的权重
-- 代码结构与UGATIT-pytorch的官方实现一致, 并且将额外的代码放到`ops/`和`utils/`两个目录中, 方便阅读
+- 代码结构与官方实现UGATIT-pytorch一致, 并且将额外的代码放到`ops/`和`utils/`两个目录中, 代码简洁, 方便阅读
 - 给出了日志与关于训练过程的详细记录, 见本文档末<关于GAN训练过程的记录>
 - 详细地说明了安装, 训练, 测试步骤
 
@@ -71,7 +71,7 @@ FLAGS_cudnn_exhaustive_search=True python main.py --light True --save_freq 500 -
 
 如果需要继续训练模型, 可以在参数后面加上`--resume True`的参数, 程序能够自动找到最近的保存点继续训练.
 
-单卡Tesla V100 16G, 在selfie2anime数据集上, 256x256分辨率, Batch Size 1, 训练Light模型100万次迭代, 需要约450小时(1.6s/it).
+单卡NVIDIA Tesla V100 16G, 在selfie2anime数据集上, 256x256分辨率, Batch Size 1, 训练Light模型100万次迭代, 需要约450小时(1.6s/it). 后续会对训练速度进行优化.
 
 ## 测试模型
 ```bash
@@ -111,22 +111,23 @@ resume|是否继续训练
 
 ## 复现的注意事项
 - 不同框架的算子权重初始化是不一样的!
+- 不同框架的`model.parameters()`返回的参数列表是不一样. PaddlePaddle除了返回模型权重外, 还会返回状态量. 复现的时候可以对比参数量的数量.
 - 要检查模型的输出和梯度, 让不同框架结果一致
-    需要考虑到前向传播, 后向传播, 优化器.
-    为了方便比较两个结果, 可以看最小值, 最大值, 均值, 方差
-- 注意var是有偏还是无偏
+    需要考虑到前向传播输出数值, 后向传播梯度数值, 优化器如何更新权重.
+    为了方便比较两个结果, 除了对比两者的MAE, MSE外, 还可以看两个结果各自的最小值, 最大值, 均值, 方差
+- 注意var函数是有偏估计还是无偏估计
 - 旧版UGATIT-pytorch有两处bug:
     1. var(var(x))的形式是错的；
     2. ResnetAdaILNBlock没有加上残差
 
 ## 复现模型遇到的坑
+- SpectralNorm的`weight_u`和`weight_v`不会更新, 后向传播算出的梯度有问题
 - Paddle的优化器的`parameter_list`必须是列表, 如果是生成器, 不会有任何警告, 而且模型权重得不到更新
 - Paddle的Linear权重是转置的
-- Paddle不支持梯度累加, 每次backward前会对梯度清零
-- SpectralNorm的`weight_u`和`weight_v`不会更新, 后向传播算出的梯度有问题
+- Paddle默认不进行梯度累加, 每次backward前会对梯度清零
 - 对rho参数用clip处理
-- paddle的instance norm的底层不是CuDNN-BatchNorm, 梯度是否正确存疑
-- 由于Paddle 1.8.4不支持中途设置优化器的学习率(`set_lr`), 加入了`hacker_opt.py`
+- Paddle的instance norm的底层不是CuDNN-BatchNorm, 梯度是否正确以及数值稳定存疑
+- 由于PaddlePaddle 1.8.4不支持训练过程中, 修改优化器的学习率(`set_lr`), 加入了`hacker_opt.py`, 以添加该函数
 
 ## 复现经验
 - 首先将不同模块分开调试, 像GAN模型, 可以只训练判别器或者只训练生成器
@@ -166,20 +167,22 @@ fake_B2B = genA2B(real_B) # To real_B
 - 对于genB2A, 希望输入B时输出A, 输入A时输出A
 
 A2B的结果图(从上到下共7张图片):
-1. real_A
+1. real_A # 原图, 真人图片
 2. fake_A2A_heatmap
-3. fake_A2A = genB2A(real_A)
+3. fake_A2A = genB2A(real_A) # 假设原图是动漫图片, 放到B2A的生成器, 生成真人图片
 4. fake_A2B_heatmap
-5. fake_A2B = genA2B(real_A)
+5. fake_A2B = genA2B(real_A) # 一般看这个就能知道生成图片的效果了, A2B中这里为生成的动漫图片
 6. fake_A2B2A_heatmap
-7. fake_A2B2A = genB2A(genA2B(real_A))
+7. fake_A2B2A = genB2A(genA2B(real_A)) # 从真人图片到动漫图片, 再变回真人图片
 
 每列对应不同的图片输入.
 
+B2A的结果图的源域和目标域和A2B的正好反过来.
+
 ## 关于GAN训练过程的记录
-- selfie2anime训练集3400张图片
+- selfie2anime训练集中, 真人图片和动漫图片各3400张；测试集中, 真人图片和动漫图片各100张.
 - 初始: 和原图比较相似, 真人图片逐渐磨皮, 淡化轮廓
-- 中间出现一些黑色裂缝
+- 前期迭代过程中, 生成的图片会出现一些黑色竖直裂缝
 - 8000次迭代: 真人图片可以看到生成了动漫的眼睛
 - 9750次迭代: 动漫图片可以看到真人鼻子
 - 10800次迭代: 动漫图片出现真人图片的细节, 但是模糊的
@@ -198,6 +201,7 @@ A2B的结果图(从上到下共7张图片):
 - 到后期, `fake_A2B2A`变得越来越像B 
 - 50000时真人的脸没了, 是空的
 - 61200时, 动漫角色人脸开始出现真人的整张人脸了
+- 生成的图片的颜色前期比较单调, 到后期变丰富
 
 ## 论文引用
 
