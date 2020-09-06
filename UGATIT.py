@@ -394,6 +394,7 @@ class UGATIT(object):
             fluid.save_dygraph(v, os.path.join(dir, self.dataset + '_%s_params_%07d' % (k, step)))
 
     def load(self, dir, step):
+        print(f'Load {dir} for the step {step}')
         names = ['genA2B', 'genB2A', 'disGA', 'disGB', 'disLA', 'disLB']
         for name in names:
             params = fluid.load_dygraph(os.path.join(dir, self.dataset + '_%s_params_%07d' % (name, step)))[0]
