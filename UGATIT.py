@@ -5,7 +5,7 @@ from dataset import ImageFolder
 from glob import glob
 import paddle.fluid as fluid
 import paddle.fluid.layers as L
-from paddle.fluid.dygraph import to_variable
+from paddle.fluid.dygraph import to_variable, TracedLayer
 import numpy as np
 
 from networks import *
@@ -404,8 +404,8 @@ class UGATIT(object):
         model_list = glob(os.path.join(self.result_dir, self.dataset, 'model', '*.pdparams'))
         if not len(model_list) == 0:
             model_list.sort()
-            iter = int(model_list[-1].split('_')[-1].split('.')[0])
-            self.load(os.path.join(self.result_dir, self.dataset, 'model'), iter)
+            it = int(model_list[-1].split('_')[-1].split('.')[0])
+            self.load(os.path.join(self.result_dir, self.dataset, 'model'), it)
             print(" [*] Load SUCCESS")
         else:
             print(" [*] Load FAILURE")
@@ -447,3 +447,35 @@ class UGATIT(object):
                                   tensor2numpy(denorm(fake_B2A2B[0]))), 0)
 
             cv2.imwrite(os.path.join(self.result_dir, self.dataset, 'test', 'B2A_%d.png' % (n + 1)), B2A * 255.0)
+
+    def deploy(self):
+        model_list = glob(os.path.join(self.result_dir, self.dataset, 'model', '*.pdparams'))
+        if not len(model_list) == 0:
+            model_list.sort()
+            it = int(model_list[-1].split('_')[-1].split('.')[0])
+            self.load(os.path.join(self.result_dir, self.dataset, 'model'), it)
+            print(" [*] Load SUCCESS")
+        else:
+            print(" [*] Load FAILURE")
+            # return
+        # self.genA2B.eval(), self.genB2A.eval()
+        real_A, _ = next(iter(self.testA_loader))
+        class Output(fluid.dygraph.Layer):
+            def __init__(self, model, i):
+                super().__init__()
+                self.model = model
+                self.i = i
+            def forward(self, x):
+                y = self.model(x)
+                return y[self.i]
+        in_var = real_A
+        model = Output(self.genA2B, 0)
+        out_dygraph, static_layer = TracedLayer.trace(model, inputs=[in_var])
+
+        out_static_graph = static_layer([in_var])
+        print(len(out_static_graph))
+        print(out_static_graph[0].shape)
+
+        dirname = './save_infer_model'
+        static_layer.save_inference_model(dirname=dirname)
+        print(f"Save static layer in the directory: `{dirname}`")

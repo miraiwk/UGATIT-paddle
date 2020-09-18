@@ -8,7 +8,7 @@ from paddle import fluid
 def parse_args():
     desc = "Paddle implementation of U-GAT-IT"
     parser = argparse.ArgumentParser(description=desc)
-    parser.add_argument('--phase', type=str, default='train', help='[train / test]')
+    parser.add_argument('--phase', type=str, default='train', help='[train / test / deploy]')
     parser.add_argument('--light', type=str2bool, default=False, help='[U-GAT-IT full version / U-GAT-IT light version]')
     parser.add_argument('--dataset', type=str, default='YOUR_DATASET_NAME', help='dataset_name')
 
@@ -83,6 +83,10 @@ def main():
         if args.phase == 'test' :
             gan.test()
             print(" [*] Test finished!")
+
+        if args.phase == 'deploy' :
+            gan.deploy()
+            print(" [*] Deploy finished!")
 
 if __name__ == '__main__':
     main()
