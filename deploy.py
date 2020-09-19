@@ -34,12 +34,17 @@ def deploy(path):
     def img_postprocess(img):
         assert isinstance(img, np.ndarray), type(img)
         img = img * 0.5 + 0.5
-        return img.squeeze(0).transpose((1, 2, 0))
+        img = img.squeeze(0).transpose((1, 2, 0))
+        # BGR to RGB
+        img = img[:, :, ::-1]
+        return img
     in_img = img_postprocess(in_np)
     out_img = img_postprocess(fetch)
     plt.subplot(121)
+    plt.title('real A')
     plt.imshow(in_img)
     plt.subplot(122)
+    plt.title('A to B')
     plt.imshow(out_img)
     plt.show()
 

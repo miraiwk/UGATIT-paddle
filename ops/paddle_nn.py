@@ -8,17 +8,7 @@ import numpy as np
 import math
 from .basic_nn import *
 from .spectral_norm import MySpectralNorm, SpectralNormConv, SpectralNormLinear
-
-def var(x, dim, unbiased=True, keepdim=False):
-    # unbiased variance
-    shape = x.shape
-    if isinstance(dim, int):
-        e = shape[dim]
-    else:
-        e = int(np.prod([shape[d] for d in dim]))
-    if unbiased:
-        e -= 1
-    return L.reduce_sum(L.square(x - L.reduce_mean(x, dim=dim, keep_dim=True)), dim=dim, keep_dim=keepdim) / e
+from .base import var
 
 from .instance_norm import MyInstanceNorm2d as InstanceNorm2d
 
