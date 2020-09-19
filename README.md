@@ -17,7 +17,7 @@ This project is an unofficial Paddle implementation of U-GAT-IT: Unsupervised Ge
 
 ## 生成结果
 
-对于selfie2anime数据集, 需要训练100万次迭代. 由于计算资源有限, 暂时无法训练100万次迭代, 这里暂时给出8.7万次迭代(8.7%)的模型在测试集上的结果(selfie2anime的测试集其实是训练集的子集). 后续会给出更好的结果 : )
+对于selfie2anime数据集, 需要训练100万次迭代. 由于计算资源有限, 暂时无法训练100万次迭代, 这里暂时给出8.7万次迭代(8.7%)的模型在测试集上的结果. 后续会给出更好的结果 : )
 
 - A2B: 从真人图片到动漫图片
 
@@ -175,7 +175,7 @@ U-GAT-IT模型的训练与测试
 - Paddle的Linear权重是转置的
 - Paddle默认不进行梯度累加, 每次backward前会对梯度清零
 - 对rho参数用clip处理
-- Paddle的instance norm的底层不是CuDNN-BatchNorm, 梯度是否正确以及数值稳定存疑
+- ~~Paddle的instance norm的底层不是CuDNN-BatchNorm, 梯度是否正确以及数值稳定存疑~~ Paddle的GPU版InstanceNorm底层是用CuDNN-BatchNorm实现的
 - 由于PaddlePaddle 1.8.4不支持训练过程中, 修改优化器的学习率(`set_lr`), 加入了`hacker_opt.py`, 以添加该函数
 
 ## 复现经验

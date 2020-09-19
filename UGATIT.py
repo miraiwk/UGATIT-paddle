@@ -457,8 +457,8 @@ class UGATIT(object):
             print(" [*] Load SUCCESS")
         else:
             print(" [*] Load FAILURE")
-            # return
-        # self.genA2B.eval(), self.genB2A.eval()
+            return
+        self.genA2B.eval(), self.genB2A.eval()
         real_A, _ = next(iter(self.testA_loader))
         class Output(fluid.dygraph.Layer):
             def __init__(self, model, i):
