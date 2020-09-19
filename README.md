@@ -17,7 +17,21 @@ This project is an unofficial Paddle implementation of U-GAT-IT: Unsupervised Ge
 
 ## 生成结果
 
-对于selfie2anime数据集, 需要训练100万次迭代. 由于计算资源有限, 暂时无法训练100万次迭代, 这里暂时给出8.7万次迭代(8.7%)的模型在测试集上的结果(selfie2anime的测试集其实是训练集的子集). 后续会给出更好的结果 : )
+对于selfie2anime数据集, 需要训练100万次迭代. 由于计算资源有限, 暂时无法训练100万次迭代, 这里暂时给出8.7万次迭代(8.7%)的模型在测试集上的结果. 后续会给出更好的结果 : )
+
+A2B的结果图(从上到下共7张图片):
+1. real_A # 原图, 真人图片
+2. fake_A2A_heatmap
+3. fake_A2A = genB2A(real_A) # 假设原图是动漫图片, 放到B2A的生成器, 生成真人图片
+4. fake_A2B_heatmap
+5. fake_A2B = genA2B(real_A) # 一般看这个就能知道生成图片的效果了, A2B中这里为生成的动漫图片
+6. fake_A2B2A_heatmap
+7. fake_A2B2A = genB2A(genA2B(real_A)) # 从真人图片到动漫图片, 再变回真人图片
+
+每列对应不同的图片输入.
+
+B2A的结果图的源域和目标域和A2B的正好反过来.
+
 
 - A2B: 从真人图片到动漫图片
 
@@ -45,6 +59,7 @@ pip install -r ./requirements.txt
 ```
 
 ## 准备数据
+
 将selfie2anime数据集放到dataset目录下, 这里将数据集文件夹名称命名为data48778
 
 使用的数据的目录格式和`YOUR_DATASET_NAME`文件夹里的目录格式保持一致.
@@ -96,6 +111,20 @@ FLAGS_cudnn_exhaustive_search=True python main.py --light True --save_freq 500 -
 生成的结果会保存在目录`results/<数据集名称>/test`下, 每个文件对应一张图片.
 
 如果使用selfie2anime数据集, A2B表示从真人图像变换到动漫图像, B2A表示从动漫图像到真人图像.
+
+## 部署模型
+
+1. 将模型保存成静态图, 模型将保存在文件夹`save_infer_model`.
+
+```bash
+python main.py --light True --phase deploy --device cpu --dataset data48778
+```
+
+2. 测试模型推断
+
+```bash
+python deploy.py
+```
 
 ## 参数说明
 参数名称 | 说明
@@ -175,7 +204,7 @@ U-GAT-IT模型的训练与测试
 - Paddle的Linear权重是转置的
 - Paddle默认不进行梯度累加, 每次backward前会对梯度清零
 - 对rho参数用clip处理
-- Paddle的instance norm的底层不是CuDNN-BatchNorm, 梯度是否正确以及数值稳定存疑
+- ~~Paddle的instance norm的底层不是CuDNN-BatchNorm, 梯度是否正确以及数值稳定存疑~~ Paddle的GPU版InstanceNorm底层是用CuDNN-BatchNorm实现的
 - 由于PaddlePaddle 1.8.4不支持训练过程中, 修改优化器的学习率(`set_lr`), 加入了`hacker_opt.py`, 以添加该函数
 
 ## 复现经验
@@ -214,19 +243,6 @@ fake_B2B = genA2B(real_B) # To real_B
 
 - 对于genA2B, 希望输入A时输出B, 输入B时输出B
 - 对于genB2A, 希望输入B时输出A, 输入A时输出A
-
-A2B的结果图(从上到下共7张图片):
-1. real_A # 原图, 真人图片
-2. fake_A2A_heatmap
-3. fake_A2A = genB2A(real_A) # 假设原图是动漫图片, 放到B2A的生成器, 生成真人图片
-4. fake_A2B_heatmap
-5. fake_A2B = genA2B(real_A) # 一般看这个就能知道生成图片的效果了, A2B中这里为生成的动漫图片
-6. fake_A2B2A_heatmap
-7. fake_A2B2A = genB2A(genA2B(real_A)) # 从真人图片到动漫图片, 再变回真人图片
-
-每列对应不同的图片输入.
-
-B2A的结果图的源域和目标域和A2B的正好反过来.
 
 ## 关于GAN训练过程的记录
 - selfie2anime训练集中, 真人图片和动漫图片各3400张；测试集中, 真人图片和动漫图片各100张.

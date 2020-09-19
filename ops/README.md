@@ -4,6 +4,10 @@
 
 对卷积和全连接的封装, 使用Kaiming Uniform对权重初始化
 
+- base.py
+
+一些基本的数学计算
+
 - instance_norm.py
 
 Instance Norm的实现, 使用Batch Norm实现

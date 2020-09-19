@@ -1,6 +1,7 @@
 from paddle import fluid
 import paddle.fluid.layers as L
-from .paddle_nn import var
+from paddle.fluid.dygraph import BatchNorm
+from .base import var
 
 
 class MyInstanceNorm2d(fluid.dygraph.Layer):
@@ -9,7 +10,14 @@ class MyInstanceNorm2d(fluid.dygraph.Layer):
         self.num_features = num_features
         self.eps = eps
     def forward(self, x):
-        N, C, H, W = x.shape
-        x_r = L.reshape(x, (1, N*C, H, W))
-        y_r = L.batch_norm(x_r, epsilon=self.eps, do_model_average_for_mean_and_var=False, use_global_stats=False)
-        return L.reshape(y_r, (N, C, H, W))
+        if self.training:
+            N, C, H, W = x.shape
+            x_r = L.reshape(x, (1, N*C, H, W))
+            # for numeric stability
+            y_r = L.batch_norm(x_r, epsilon=self.eps, do_model_average_for_mean_and_var=False, use_global_stats=False)
+            return L.reshape(y_r, (N, C, H, W))
+        else:
+            _mean = L.reduce_mean(x, dim=[2, 3], keep_dim=True)
+            _var = var(x, dim=[2, 3], unbiased=False, keepdim=True)
+            y = (x - _mean) / L.sqrt(_var + self.eps)
+            return y
